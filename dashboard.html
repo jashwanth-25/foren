@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — TruthTrace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F3F6FB;
+    --sidebar:#FFFFFF;
+    --card:#FFFFFF;
+    --border:#E6EBF3;
+    --border-soft:#EEF2F8;
+    --text:#16213A;
+    --text-muted:#64748B;
+    --text-dim:#94A3B8;
+    --blue:#2E56E8;
+    --blue-dark:#1C3FBF;
+    --blue-tint:#EAF0FE;
+    --blue-tint-2:#DCE6FD;
+    --green:#17A768;
+    --green-tint:#E5F7EE;
+    --amber:#C9891F;
+    --amber-tint:#FBF1DF;
+    --red:#D8433F;
+    --red-tint:#FBEAEA;
+    --shadow: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.05);
+    --font-display:'Lora', Georgia, serif;
+    --font-body:'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0E1420; --sidebar:#131A28; --card:#131A28; --border:#232C3D; --border-soft:#1C2534;
+      --text:#EAEEF6; --text-muted:#93A0B8; --text-dim:#5E6C85;
+      --blue-tint:#182346; --blue-tint-2:#1B2A54; --green-tint:#102A22; --amber-tint:#2C2313; --red-tint:#2E1918;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0E1420; --sidebar:#131A28; --card:#131A28; --border:#232C3D; --border-soft:#1C2534;
+    --text:#EAEEF6; --text-muted:#93A0B8; --text-dim:#5E6C85;
+    --blue-tint:#182346; --blue-tint-2:#1B2A54; --green-tint:#102A22; --amber-tint:#2C2313; --red-tint:#2E1918;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+  button{ font-family:inherit; }
+  ::selection{ background:var(--blue-tint-2); }
+
+  .app{ display:flex; min-height:100vh; }
+
+  /* ---------------- Sidebar ---------------- */
+  .sidebar{
+    width:250px; flex-shrink:0;
+    background:var(--sidebar);
+    border-right:1px solid var(--border-soft);
+    padding:22px 16px;
+    display:flex; flex-direction:column;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; padding:4px 8px 4px; }
+  .brand-mark{
+    width:34px; height:34px; border-radius:9px; flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:var(--font-display); font-weight:600; font-size:16px;
+  }
+  .brand-text{ line-height:1.15; }
+  .brand-text .name{ font-family:var(--font-body); font-weight:700; font-size:1.05rem; letter-spacing:-0.01em; }
+  .brand-text .name .accent{ color:var(--blue); }
+  .brand-text .tagline{ font-size:0.6rem; color:var(--text-dim); letter-spacing:0.11em; font-weight:600; }
+
+  nav.sidenav{ margin-top:26px; display:flex; flex-direction:column; gap:2px; }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:9px;
+    color:var(--text-muted); font-size:0.9rem; font-weight:500;
+    cursor:pointer; border:none; background:none; width:100%; text-align:left;
+  }
+  .nav-item svg{ width:18px; height:18px; flex-shrink:0; }
+  .nav-item:hover{ background:var(--border-soft); color:var(--text); }
+  .nav-item.active{ background:var(--blue-tint); color:var(--blue); font-weight:600; }
+  .nav-item.active svg{ color:var(--blue); }
+  .nav-item[disabled]{ opacity:0.4; cursor:default; }
+  .nav-item[disabled]:hover{ background:none; color:var(--text-muted); }
+
+  .sidebar-foot{ margin-top:auto; padding:14px 12px 4px; border-top:1px solid var(--border-soft); }
+  .sidebar-foot p{ margin:10px 0 0; font-size:0.72rem; color:var(--text-dim); line-height:1.5; font-style:italic; font-family:var(--font-display); }
+
+  /* ---------------- Main ---------------- */
+  main{ flex:1; min-width:0; padding:20px 32px 56px; }
+
+  .topbar{ display:flex; align-items:center; gap:16px; justify-content:space-between; margin-bottom:8px; }
+  .search{
+    flex:1; max-width:420px; display:flex; align-items:center; gap:10px;
+    background:var(--card); border:1px solid var(--border); border-radius:999px;
+    padding:10px 16px; color:var(--text-dim); font-size:0.88rem;
+  }
+  .search svg{ width:16px; height:16px; flex-shrink:0; color:var(--text-dim); }
+  .search input{
+    border:none; outline:none; background:none; font:inherit; color:var(--text); width:100%;
+  }
+  .search input::placeholder{ color:var(--text-dim); }
+  .top-right{ display:flex; align-items:center; gap:18px; }
+  .bell-wrap{ position:relative; }
+  .bell{ position:relative; width:36px; height:36px; border-radius:999px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); background:var(--card); cursor:pointer; }
+  .bell svg{ width:17px; height:17px; color:var(--text-muted); }
+  .bell .dot{ position:absolute; top:8px; right:8px; width:7px; height:7px; border-radius:999px; background:var(--blue); }
+  .bell .dot.hide{ display:none; }
+  .profile{ display:flex; align-items:center; gap:10px; cursor:pointer; position:relative; border:none; background:none; padding:0; color:inherit; }
+  .avatar{ width:36px; height:36px; border-radius:999px; background:linear-gradient(135deg, var(--blue), var(--blue-dark)); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+  .profile-text{ line-height:1.2; text-align:left; }
+  .profile-text .pname{ font-size:0.85rem; font-weight:600; }
+  .profile-text .prole{ font-size:0.72rem; color:var(--text-dim); }
+  .chev{ width:14px; height:14px; color:var(--text-dim); }
+
+  .dropdown{
+    position:absolute; top:calc(100% + 10px); right:0; width:280px;
+    background:var(--card); border:1px solid var(--border-soft); border-radius:12px;
+    box-shadow:0 8px 24px rgba(16,24,40,0.12); padding:8px; z-index:40;
+    display:none;
+  }
+  .dropdown.open{ display:block; }
+  .dropdown-title{ font-size:0.72rem; font-weight:700; letter-spacing:0.04em; color:var(--text-dim); padding:8px 10px 6px; }
+  .dd-item{ display:flex; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; }
+  .dd-item:hover{ background:var(--border-soft); }
+  .dd-item .dd-icon{ width:28px; height:28px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--blue-tint); color:var(--blue); }
+  .dd-item .dd-icon svg{ width:14px; height:14px; }
+  .dd-item .t{ font-size:0.82rem; font-weight:600; }
+  .dd-item .s{ font-size:0.72rem; color:var(--text-dim); margin-top:1px; }
+  .dd-simple{ padding:9px 10px; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:500; }
+  .dd-simple:hover{ background:var(--border-soft); }
+
+  /* ---------------- Hero ---------------- */
+  .hero{
+    margin-top:22px; border-radius:18px; overflow:hidden; position:relative;
+    background:var(--card); border:1px solid var(--border-soft);
+    display:grid; grid-template-columns:1.35fr 1fr;
+    min-height:190px;
+  }
+  .hero-left{ padding:34px 8px 30px 6px; display:flex; flex-direction:column; justify-content:center; }
+  .breadcrumb{ font-size:0.7rem; letter-spacing:0.08em; color:var(--text-dim); font-weight:600; margin-bottom:10px; }
+  .breadcrumb .sep{ margin:0 6px; }
+  .breadcrumb .cur{ color:var(--blue); }
+  .hero h1{
+    font-family:var(--font-display); font-weight:600; margin:0 0 10px;
+    font-size:clamp(1.5rem, 2.4vw, 2.15rem); line-height:1.18; letter-spacing:-0.01em;
+  }
+  .hero h1 em{ font-style:italic; color:var(--blue); }
+  .hero p.lede{ color:var(--text-muted); margin:0; font-size:0.96rem; max-width:46ch; }
+
+  .hero-right{
+    position:relative; overflow:hidden;
+    background:
+      radial-gradient(circle at 78% 22%, rgba(46,86,232,0.16), transparent 55%),
+      linear-gradient(155deg, var(--blue-tint) 0%, var(--blue-tint-2) 60%, var(--card) 100%);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-right svg{ width:70%; max-width:200px; opacity:0.95; }
+  .hero-vert{
+    position:absolute; right:16px; top:50%; transform:translateY(-50%);
+    writing-mode:vertical-rl; text-orientation:mixed;
+    font-family:var(--font-display); font-style:italic; font-weight:500;
+    font-size:0.72rem; letter-spacing:0.14em; color:var(--text-muted);
+    display:none;
+  }
+  @media (min-width:1180px){ .hero-vert{ display:block; } }
+
+  /* ---------------- Stat cards ---------------- */
+  .stats{ display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-top:20px; }
+  .stat{
+    background:var(--card); border:1px solid var(--border-soft); border-radius:14px;
+    padding:18px 20px; box-shadow:var(--shadow);
+  }
+  .stat-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .stat-icon{ width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+  .stat-icon svg{ width:17px; height:17px; }
+  .stat-icon.blue{ background:var(--blue-tint); color:var(--blue); }
+  .stat-icon.green{ background:var(--green-tint); color:var(--green); }
+  .stat-icon.amber{ background:var(--amber-tint); color:var(--amber); }
+  .stat-icon.red{ background:var(--red-tint); color:var(--red); }
+  .stat-delta{ font-size:0.74rem; font-weight:600; display:flex; align-items:center; gap:3px; }
+  .stat-delta.up{ color:var(--green); }
+  .stat-delta.down{ color:var(--red); }
+  .stat-num{ font-family:var(--font-display); font-size:1.65rem; font-weight:600; letter-spacing:-0.01em; }
+  .stat-label{ font-size:0.82rem; color:var(--text-muted); margin-top:3px; }
+
+  /* ---------------- Layout grid ---------------- */
+  .grid{ display:grid; grid-template-columns:1.62fr 1fr; gap:16px; margin-top:16px; align-items:start; }
+  .card{
+    background:var(--card); border:1px solid var(--border-soft); border-radius:14px;
+    padding:20px 22px; box-shadow:var(--shadow);
+  }
+  .card + .card{ margin-top:16px; }
+  .card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:10px; flex-wrap:wrap; }
+  .card-title{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:600; font-size:1.02rem; }
+  .card-title svg{ width:18px; height:18px; color:var(--blue); flex-shrink:0; }
+  .link-more{ font-size:0.8rem; color:var(--blue); font-weight:600; display:flex; align-items:center; gap:4px; background:none; border:none; cursor:pointer; padding:0; }
+  .link-more svg{ width:13px; height:13px; }
+
+  /* Recent investigations table */
+  table.inv{ width:100%; border-collapse:collapse; }
+  table.inv th{
+    text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--text-dim); font-weight:600; padding:0 10px 10px; border-bottom:1px solid var(--border-soft);
+  }
+  table.inv td{ padding:12px 10px; border-bottom:1px solid var(--border-soft); font-size:0.86rem; vertical-align:middle; }
+  table.inv tr:last-child td{ border-bottom:none; }
+  table.inv tr.clickable{ cursor:pointer; }
+  table.inv tr.clickable:hover{ background:var(--border-soft); }
+  .inv-name{ display:flex; align-items:center; gap:10px; }
+  .thumb{ width:38px; height:38px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--blue-tint); color:var(--blue); overflow:hidden; }
+  .thumb svg{ width:16px; height:16px; }
+  .thumb img{ width:100%; height:100%; object-fit:cover; }
+  .inv-name .t{ font-weight:600; }
+  .inv-name .s{ font-size:0.76rem; color:var(--text-dim); }
+  .pill{ display:inline-flex; padding:3px 10px; border-radius:999px; font-size:0.74rem; font-weight:600; white-space:nowrap; }
+  .pill.authentic{ background:var(--green-tint); color:var(--green); }
+  .pill.review{ background:var(--amber-tint); color:var(--amber); }
+  .pill.flagged{ background:var(--red-tint); color:var(--red); }
+  .pill.pass{ background:var(--green-tint); color:var(--green); }
+  .pill.reviewed{ background:var(--amber-tint); color:var(--amber); }
+  .conf{ font-weight:600; font-variant-numeric:tabular-nums; }
+  .row-ext{ color:var(--text-dim); }
+  .row-ext svg{ width:15px; height:15px; display:block; }
+  .empty-row td{ text-align:center; color:var(--text-dim); padding:26px 10px; font-size:0.86rem; }
+
+  /* Activity chart */
+  .chart-wrap{ display:flex; align-items:flex-end; gap:10px; height:150px; padding-top:6px; }
+  .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; height:100%; justify-content:flex-end; }
+  .bar{ width:60%; border-radius:5px 5px 0 0; background:var(--blue-tint-2); transition:height 0.4s ease, background 0.15s; }
+  .bar.peak{ background:var(--blue); }
+  .bar-lbl{ font-size:0.68rem; color:var(--text-dim); }
+
+  /* Quick actions */
+  .qa-btn{
+    display:flex; align-items:center; gap:12px; width:100%;
+    border:1px solid var(--border); border-radius:11px; padding:13px 14px;
+    background:var(--card); font-size:0.88rem; font-weight:600; color:var(--text); cursor:pointer;
+    text-align:left;
+  }
+  .qa-btn + .qa-btn{ margin-top:10px; }
+  .qa-btn.primary{ background:linear-gradient(135deg, var(--blue), var(--blue-dark)); color:#fff; border-color:transparent; }
+  .qa-btn svg{ width:17px; height:17px; flex-shrink:0; }
+  .qa-btn.primary svg{ color:#fff; }
+  .qa-btn:not(.primary) svg{ color:var(--blue); }
+  .qa-btn:hover:not(.primary){ background:var(--border-soft); }
+  .qa-btn:hover.primary{ filter:brightness(1.06); }
+  .qa-btn:disabled{ opacity:0.55; cursor:default; }
+
+  /* Alerts */
+  .alert-item{ display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border-soft); }
+  .alert-item:last-child{ border-bottom:none; padding-bottom:0; }
+  .alert-icon{ width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:var(--red-tint); color:var(--red); }
+  .alert-icon.blue{ background:var(--blue-tint); color:var(--blue); }
+  .alert-icon svg{ width:15px; height:15px; }
+  .alert-body .t{ font-size:0.85rem; font-weight:600; }
+  .alert-body .s{ font-size:0.76rem; color:var(--text-dim); margin-top:2px; }
+
+  /* Quote card */
+  .quote-card{
+    background:linear-gradient(155deg, var(--blue-tint), var(--card));
+    border:1px solid var(--border-soft); border-radius:14px; padding:22px;
+    display:flex; gap:12px; align-items:flex-start;
+  }
+  .quote-card svg{ width:22px; height:22px; color:var(--blue); flex-shrink:0; margin-top:2px; }
+  .quote-card p{ margin:0; font-family:var(--font-display); font-style:italic; font-size:1.02rem; line-height:1.4; }
+  .quote-card .attr{ display:block; margin-top:8px; font-family:var(--font-body); font-style:normal; font-size:0.72rem; color:var(--text-dim); font-weight:600; letter-spacing:0.04em; }
+
+  /* ---------------- New Investigation view ---------------- */
+  .view{ display:none; }
+  .view.active{ display:block; }
+  .ni-grid{ display:grid; grid-template-columns:1.55fr 1fr; gap:16px; margin-top:16px; align-items:start; }
+  .dropzone{
+    border:1.5px dashed var(--border); border-radius:12px; padding:44px 20px;
+    text-align:center; cursor:pointer; transition:border-color 0.15s, background 0.15s;
+  }
+  .dropzone:hover, .dropzone.dragover{ border-color:var(--blue); background:var(--blue-tint); }
+  .dropzone svg{ width:34px; height:34px; color:var(--blue); margin-bottom:10px; }
+  .dropzone .dz-main{ font-weight:600; font-size:0.95rem; }
+  .dropzone .dz-or{ font-size:0.78rem; color:var(--text-dim); margin:8px 0; }
+  .choose-btn{
+    display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg, var(--blue), var(--blue-dark));
+    color:#fff; border:none; border-radius:999px; padding:10px 20px; font-weight:600; font-size:0.86rem; cursor:pointer;
+  }
+  .dz-formats{ font-size:0.72rem; color:var(--text-dim); margin-top:12px; }
+  .dz-preview{ display:none; align-items:center; gap:14px; text-align:left; }
+  .dz-preview.show{ display:flex; }
+  .dz-preview img{ width:64px; height:64px; border-radius:9px; object-fit:cover; flex-shrink:0; }
+  .dz-preview .fname{ font-weight:600; font-size:0.9rem; }
+  .dz-preview .fmeta{ font-size:0.78rem; color:var(--text-dim); margin-top:2px; }
+  .dz-preview .fclear{ margin-left:auto; background:none; border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:0.76rem; cursor:pointer; color:var(--text-muted); }
+
+  .field{ margin-top:16px; }
+  .field label{ display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; }
+  .field input, .field textarea{
+    width:100%; border:1px solid var(--border); border-radius:9px; padding:10px 12px;
+    font:inherit; font-size:0.88rem; background:var(--bg); color:var(--text); resize:vertical;
+  }
+  .field textarea{ min-height:76px; }
+  .field input:focus, .field textarea:focus{ outline:2px solid var(--blue); outline-offset:1px; }
+
+  .start-btn{
+    margin-top:18px; display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, var(--blue), var(--blue-dark)); color:#fff; border:none;
+    border-radius:10px; padding:12px 22px; font-weight:600; font-size:0.9rem; cursor:pointer;
+  }
+  .start-btn:disabled{ opacity:0.5; cursor:default; }
+  .start-btn svg{ width:16px; height:16px; }
+
+  .tip-list{ display:flex; flex-direction:column; gap:12px; }
+  .tip-item{ display:flex; gap:10px; font-size:0.84rem; color:var(--text-muted); }
+  .tip-item svg{ width:16px; height:16px; color:var(--blue); flex-shrink:0; margin-top:1px; }
+
+  .progress-wrap{ display:none; margin-top:18px; }
+  .progress-wrap.show{ display:block; }
+  .progress-track{ height:7px; border-radius:99px; background:var(--border-soft); overflow:hidden; }
+  .progress-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--blue), var(--blue-dark)); transition:width 0.25s ease; }
+  .progress-label{ font-size:0.78rem; color:var(--text-dim); margin-top:8px; font-family:var(--font-mono); }
+
+  /* ---------------- Analysis view ---------------- */
+  .an-grid{ display:grid; grid-template-columns:1.35fr 1fr; gap:16px; margin-top:16px; align-items:start; }
+  .an-img{ width:100%; border-radius:10px; display:block; object-fit:cover; max-height:280px; background:var(--border-soft); }
+  .meta-row{ display:flex; justify-content:space-between; font-size:0.84rem; padding:9px 0; border-bottom:1px solid var(--border-soft); }
+  .meta-row:last-child{ border-bottom:none; }
+  .meta-row .k{ color:var(--text-dim); }
+  .meta-row .v{ font-weight:600; }
+
+  .verdict-badge{ display:inline-flex; padding:4px 12px; border-radius:999px; font-size:0.76rem; font-weight:700; }
+  .verdict-badge.authentic{ background:var(--green-tint); color:var(--green); }
+  .verdict-badge.review{ background:var(--amber-tint); color:var(--amber); }
+  .verdict-badge.flagged{ background:var(--red-tint); color:var(--red); }
+  .assess-title{ font-family:var(--font-display); font-weight:600; font-size:1.05rem; margin:12px 0 6px; }
+  .assess-desc{ font-size:0.85rem; color:var(--text-muted); line-height:1.5; margin:0 0 14px; }
+  .conf-track{ height:8px; border-radius:99px; background:var(--border-soft); overflow:hidden; }
+  .conf-fill{ height:100%; border-radius:99px; }
+  .conf-fill.authentic{ background:var(--green); }
+  .conf-fill.review{ background:var(--amber); }
+  .conf-fill.flagged{ background:var(--red); }
+  .conf-foot{ display:flex; justify-content:space-between; font-size:0.76rem; color:var(--text-dim); margin-top:7px; }
+
+  .breakdown-item{ border-bottom:1px solid var(--border-soft); }
+  .breakdown-item:last-child{ border-bottom:none; }
+  .bd-head{ display:flex; align-items:center; gap:12px; padding:13px 0; cursor:pointer; }
+  .bd-icon{ width:30px; height:30px; border-radius:8px; background:var(--blue-tint); color:var(--blue); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .bd-icon svg{ width:14px; height:14px; }
+  .bd-title{ flex:1; }
+  .bd-title .t{ font-weight:600; font-size:0.86rem; }
+  .bd-title .s{ font-size:0.76rem; color:var(--text-dim); margin-top:1px; }
+  .bd-chev{ width:14px; height:14px; color:var(--text-dim); transition:transform 0.15s; flex-shrink:0; }
+  .breakdown-item.open .bd-chev{ transform:rotate(180deg); }
+  .bd-detail{ display:none; padding:0 0 14px 42px; font-size:0.8rem; color:var(--text-muted); line-height:1.5; }
+  .breakdown-item.open .bd-detail{ display:block; }
+
+  @media (max-width:1080px){
+    .stats{ grid-template-columns:repeat(2,1fr); }
+    .grid, .ni-grid, .an-grid{ grid-template-columns:1fr; }
+    .hero{ grid-template-columns:1fr; }
+    .hero-right{ display:none; }
+  }
+  @media (max-width:720px){
+    .sidebar{ display:none; }
+    main{ padding:18px; }
+    .stats{ grid-template-columns:1fr; }
+    table.inv{ font-size:0.78rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">T</div>
+      <div class="brand-text">
+        <div class="name">Truth<span class="accent">Trace</span></div>
+        <div class="tagline">UNCOVER · TRACE · VERIFY</div>
+      </div>
+    </div>
+
+    <nav class="sidenav" id="sidenav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9 21v-6h6v6"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="new">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V8"/><path d="m9 11 3-3 3 3"/><path d="M20 16.5A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-1A2.5 2.5 0 0 1 6.5 13H8"/><path d="M4 15.5V7a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6.5"/></svg>
+        New Investigation
+      </button>
+      <button class="nav-item" data-view="analysis">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20V10"/><path d="M10 20V4"/><path d="M17 20v-7"/></svg>
+        Analysis
+      </button>
+      <button class="nav-item" data-view="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>
+        Reports
+      </button>
+      <button class="nav-item" disabled title="Prototype — not wired up yet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        Similar Matches
+      </button>
+      <button class="nav-item" disabled title="Prototype — not wired up yet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        Timeline
+      </button>
+      <button class="nav-item" disabled title="Prototype — not wired up yet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        Source Attribution
+      </button>
+      <button class="nav-item" disabled title="Prototype — not wired up yet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>
+        Evidence Vault
+      </button>
+      <button class="nav-item" disabled title="Prototype — not wired up yet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <p>“Every case begins with one image.”</p>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="searchInput" type="text" placeholder="Search cases, images, or reports...">
+      </div>
+      <div class="top-right">
+        <div class="bell-wrap">
+          <div class="bell" id="bellBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+            <div class="dot" id="bellDot"></div>
+          </div>
+          <div class="dropdown" id="bellDropdown">
+            <div class="dropdown-title">NOTIFICATIONS</div>
+            <div id="bellList"></div>
+          </div>
+        </div>
+        <div class="profile" id="profileBtn">
+          <div class="avatar">M</div>
+          <div class="profile-text">
+            <div class="pname">Munazza</div>
+            <div class="prole">Investigator</div>
+          </div>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          <div class="dropdown" id="profileDropdown" style="right:0; width:180px;">
+            <div class="dd-simple">View Profile</div>
+            <div class="dd-simple">Settings</div>
+            <div class="dd-simple">Sign Out</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD VIEW ============ -->
+    <section class="view active" data-view-section="dashboard">
+      <div class="hero">
+        <div class="hero-left">
+          <div class="breadcrumb">OVERVIEW <span class="sep">/</span> <span class="cur">DASHBOARD</span></div>
+          <h1>Welcome back, <em>Munazza</em></h1>
+          <p class="lede">Detection, attribution and evidence preservation — every morphed or manipulated image, traced in one pipeline.</p>
+        </div>
+        <div class="hero-right">
+          <svg viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="72" stroke="#2E56E8" stroke-width="1.4" opacity="0.35"/>
+            <circle cx="100" cy="100" r="50" stroke="#2E56E8" stroke-width="1.4" opacity="0.5"/>
+            <circle cx="86" cy="86" r="34" fill="none" stroke="#2E56E8" stroke-width="3"/>
+            <line x1="110" y1="110" x2="140" y2="140" stroke="#2E56E8" stroke-width="6" stroke-linecap="round"/>
+            <path d="M70 86a16 16 0 0 1 16-16" stroke="#1C3FBF" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="150" cy="52" r="4" fill="#2E56E8" opacity="0.5"/>
+            <circle cx="42" cy="140" r="3" fill="#2E56E8" opacity="0.4"/>
+          </svg>
+          <div class="hero-vert">DETECTION · ATTRIBUTION · EVIDENCE</div>
+        </div>
+      </div>
+
+      <div class="stats" id="statsRow"></div>
+
+      <div class="grid">
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>
+                Recent Investigations
+              </div>
+              <button class="link-more" data-view="reports">View All <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+            </div>
+            <table class="inv">
+              <thead>
+                <tr><th>Investigation</th><th>Case ID</th><th>Forgery Type</th><th>Verdict</th><th>Confidence</th><th>Updated</th></tr>
+              </thead>
+              <tbody id="dashTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20V10"/><path d="M10 20V4"/><path d="M17 20v-7"/></svg>
+                Detections Over Time
+              </div>
+              <div class="link-more" style="cursor:default; color:var(--text-dim);">Last 8 Days</div>
+            </div>
+            <div class="chart-wrap" id="chartWrap"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+                Quick Actions
+              </div>
+            </div>
+            <button class="qa-btn primary" data-view="new">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V8"/><path d="m9 11 3-3 3 3"/><path d="M4 15.5V7a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6.5"/></svg>
+              Start New Investigation
+            </button>
+            <button class="qa-btn" id="graphBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5 11 16M16 7.5 13 16M8.5 6h7"/></svg>
+              View Investigation Graph
+            </button>
+            <button class="qa-btn" id="exportBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><path d="M7 12h3M14 12h3"/></svg>
+              Export Evidence Hash
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                Recent Alerts
+              </div>
+            </div>
+            <div id="alertsList"></div>
+          </div>
+
+          <div class="quote-card">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 5C6 6.5 4 9.3 4 12.7c0 2.6 1.6 4.3 3.7 4.3 1.9 0 3.3-1.4 3.3-3.2 0-1.7-1.2-3-2.8-3.1.4-2 1.9-3.6 3.8-4.4L9.5 5Zm9 0c-3.5 1.5-5.5 4.3-5.5 7.7 0 2.6 1.6 4.3 3.7 4.3 1.9 0 3.3-1.4 3.3-3.2 0-1.7-1.2-3-2.8-3.1.4-2 1.9-3.6 3.8-4.4L18.5 5Z"/></svg>
+            <p>Suspected image → forensic verdict → traceable, explainable evidence.<span class="attr">FORENSIGHT PIPELINE</span></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ NEW INVESTIGATION VIEW ============ -->
+    <section class="view" data-view-section="new">
+      <div class="hero" style="min-height:auto; padding:0; background:none; border:none;">
+        <div class="hero-left" style="padding:8px 0 18px;">
+          <div class="breadcrumb">INVESTIGATION <span class="sep">/</span> <span class="cur">UPLOAD</span></div>
+          <h1 style="font-size:clamp(1.5rem,2.4vw,2.1rem);">Start a New <em>Investigation</em></h1>
+          <p class="lede">Upload an image to analyze, trace, and uncover its story.</p>
+        </div>
+      </div>
+
+      <div class="ni-grid">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>
+              Upload Image
+            </div>
+          </div>
+
+          <div class="dropzone" id="dropzone">
+            <div id="dzEmpty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 16V8"/><path d="m9 11 3-3 3 3"/><path d="M20 16.5A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-1A2.5 2.5 0 0 1 6.5 13H8"/><path d="M4 15.5V7a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v6.5"/></svg>
+              <div class="dz-main">Drag &amp; drop an image here</div>
+              <div class="dz-or">or</div>
+              <button type="button" class="choose-btn" id="chooseFileBtn">Choose File</button>
+              <div class="dz-formats">Supported formats: JPG, PNG, WEBP (Max 20MB)</div>
+            </div>
+            <div class="dz-preview" id="dzPreview">
+              <img id="dzPreviewImg" alt="">
+              <div>
+                <div class="fname" id="dzFname"></div>
+                <div class="fmeta" id="dzFmeta"></div>
+              </div>
+              <button type="button" class="fclear" id="dzClearBtn">Remove</button>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display:none;">
+          </div>
+
+          <div class="field">
+            <label for="invName">Investigation Name</label>
+            <input type="text" id="invName" placeholder="e.g., Social Media Image – Case 001">
+          </div>
+          <div class="field">
+            <label for="invNotes">Optional Notes</label>
+            <textarea id="invNotes" placeholder="Add any context, source, or description (optional)..."></textarea>
+          </div>
+
+          <button class="start-btn" id="startBtn" disabled>
+            Start Analysis
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label" id="progressLabel">Reading pixel data…</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg>
+              Investigation Tips
+            </div>
+          </div>
+          <div class="tip-list">
+            <div class="tip-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="m3 15 5-5 4 4 5-6 4 5"/></svg>Use high-quality images for better results.</div>
+            <div class="tip-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17H7a5 5 0 0 1 0-10h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>Screenshots, social posts, and news images are supported.</div>
+            <div class="tip-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>Add relevant context to improve analysis.</div>
+            <div class="tip-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg>This is a hackathon prototype — analysis is simulated on-device, not a live forensic model.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ANALYSIS VIEW ============ -->
+    <section class="view" data-view-section="analysis">
+      <div id="analysisEmpty" style="display:none;">
+        <div class="card" style="text-align:center; padding:50px 20px;">
+          <div class="card-title" style="justify-content:center; margin-bottom:8px;">No analysis yet</div>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin:0 0 16px;">Start a new investigation to see forensic results here.</p>
+          <button class="start-btn" data-view="new" style="margin:0;">Start New Investigation</button>
+        </div>
+      </div>
+
+      <div id="analysisContent" style="display:none;">
+        <div class="hero" style="min-height:auto; padding:0; background:none; border:none;">
+          <div class="hero-left" style="padding:8px 0 18px;">
+            <div class="breadcrumb">INVESTIGATIONS <span class="sep">/</span> <span class="cur" id="anCaseId">TT-2026-000</span></div>
+            <h1 style="font-size:clamp(1.5rem,2.4vw,2.1rem);">Analysis <em>Results</em></h1>
+            <p class="lede">Here's what we found. Every detail matters.</p>
+          </div>
+        </div>
+
+        <div class="an-grid">
+          <div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>
+                  Uploaded Image
+                </div>
+              </div>
+              <img id="anImg" class="an-img" alt="Uploaded evidence image">
+              <div style="margin-top:14px;">
+                <div class="meta-row"><span class="k">File Name</span><span class="v" id="anFname">—</span></div>
+                <div class="meta-row"><span class="k">File Type</span><span class="v" id="anFtype">—</span></div>
+                <div class="meta-row"><span class="k">File Size</span><span class="v" id="anFsize">—</span></div>
+                <div class="meta-row"><span class="k">Uploaded On</span><span class="v" id="anFdate">—</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 20V10"/><path d="M10 20V4"/><path d="M17 20v-7"/></svg>
+                  Analysis Breakdown
+                </div>
+              </div>
+              <div id="breakdownList"></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg>
+                  Overall Assessment
+                </div>
+                <span class="verdict-badge" id="anVerdictBadge"></span>
+              </div>
+              <div class="assess-title" id="anAssessTitle"></div>
+              <p class="assess-desc" id="anAssessDesc"></p>
+              <div class="conf-track"><div class="conf-fill" id="anConfFill"></div></div>
+              <div class="conf-foot"><span>Confidence Score</span><span id="anConfNum">—</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><path d="M7 12h3M14 12h3"/></svg>
+                  Chain of Custody
+                </div>
+              </div>
+              <div class="meta-row"><span class="k">Evidence Hash</span><span class="v" id="anHash" style="font-family:var(--font-mono); font-size:0.72rem;">—</span></div>
+              <div class="meta-row"><span class="k">Forgery Type</span><span class="v" id="anForgeryType">—</span></div>
+              <div class="meta-row"><span class="k">Logged</span><span class="v" id="anLogged">Yes, this session</span></div>
+            </div>
+
+            <div class="quote-card">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 5C6 6.5 4 9.3 4 12.7c0 2.6 1.6 4.3 3.7 4.3 1.9 0 3.3-1.4 3.3-3.2 0-1.7-1.2-3-2.8-3.1.4-2 1.9-3.6 3.8-4.4L9.5 5Zm9 0c-3.5 1.5-5.5 4.3-5.5 7.7 0 2.6 1.6 4.3 3.7 4.3 1.9 0 3.3-1.4 3.3-3.2 0-1.7-1.2-3-2.8-3.1.4-2 1.9-3.6 3.8-4.4L18.5 5Z"/></svg>
+              <p>Evidence doesn't lie. It just waits to be seen.<span class="attr">TRUTHTRACE ANALYSIS</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ REPORTS VIEW ============ -->
+    <section class="view" data-view-section="reports">
+      <div class="hero" style="min-height:auto; padding:0; background:none; border:none;">
+        <div class="hero-left" style="padding:8px 0 18px;">
+          <div class="breadcrumb">INVESTIGATIONS <span class="sep">/</span> <span class="cur">REPORTS</span></div>
+          <h1 style="font-size:clamp(1.5rem,2.4vw,2.1rem);">All Investigations</h1>
+          <p class="lede">Every case you've run in this session, searchable and up to date.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/></svg>
+            Investigations
+          </div>
+          <div class="link-more" id="reportsCount" style="cursor:default; color:var(--text-dim);"></div>
+        </div>
+        <table class="inv">
+          <thead>
+            <tr><th>Investigation</th><th>Case ID</th><th>Forgery Type</th><th>Verdict</th><th>Confidence</th><th>Updated</th></tr>
+          </thead>
+          <tbody id="reportsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Seed data ---------------- */
+  var STORAGE_KEY = 'truthtrace_investigations_v1';
+  var seed = [
+    { id:'TT-2026-004', name:'Court Building Photo', filename:'court_building.jpg', forgeryType:'None detected',
+      verdict:'authentic', confidence:87, updated:'10 Sep 2026', img:null, hash:'8f3a1c9e0b2d4f7a' },
+    { id:'TT-2026-003', name:'Sky Image Verification', filename:'sky_protest.jpg', forgeryType:'Splicing (sky region)',
+      verdict:'review', confidence:72, updated:'08 Sep 2026', img:null, hash:'2b7e6a1f9c3d0e58' },
+    { id:'TT-2026-002', name:'Rally Crowd Photo', filename:'rally_crowd.jpg', forgeryType:'Face-swap, 3 faces',
+      verdict:'flagged', confidence:94, updated:'06 Sep 2026', img:null, hash:'d41a9c0f5b8e27a3' },
+    { id:'TT-2026-001', name:'Protest Banner Copy-Move', filename:'news_article.png', forgeryType:'Copy-move, banner text',
+      verdict:'flagged', confidence:81, updated:'03 Sep 2026', img:null, hash:'6c9f2e8a1d4b07c5' }
+  ];
+
+  var alerts = [
+    { icon:'flag', title:'Face-swap detected — Rally Crowd Photo', sub:'94% confidence · Grad-CAM heatmap ready · 2 days ago' },
+    { icon:'search', title:'Propagation match found', sub:'Sky Image Verification · 3 platforms · 3 days ago' },
+    { icon:'hash', title:'Evidence hash logged', sub:'Court Building Photo · chain of custody · 5 days ago' }
+  ];
+
+  var icons = {
+    doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v13H8l-4 4z"/></svg>',
+    globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg>',
+    flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>',
+    search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    hash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="4" height="4" rx="1"/><rect x="10" y="10" width="4" height="4" rx="1"/><rect x="17" y="10" width="4" height="4" rx="1"/><path d="M7 12h3M14 12h3"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'
+  };
+
+  /* ---------------- State ---------------- */
+  var investigations = loadState();
+  var pendingFile = null;   // {file, dataUrl}
+  var lastAnalyzed = null;  // most recent investigation object, for Analysis view
+  var currentView = 'dashboard';
+
+  function loadState(){
+    try{
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        if(Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    }catch(e){ /* storage unavailable — fall through to seed */ }
+    return seed.slice();
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(investigations)); }catch(e){ /* ignore */ }
+  }
+
+  /* ---------------- Helpers ---------------- */
+  function verdictLabel(v){
+    return v === 'authentic' ? 'Likely Authentic' : v === 'review' ? 'Needs Review' : 'Manipulated';
+  }
+  function verdictPillClass(v){
+    return v === 'authentic' ? 'authentic' : v === 'review' ? 'review' : 'flagged';
+  }
+  function fmtBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+    return (n/(1024*1024)).toFixed(1) + ' MB';
+  }
+  function fmtDate(d){
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+  }
+  function nextCaseId(){
+    var max = 0;
+    investigations.forEach(function(inv){
+      var m = /TT-2026-(\d+)/.exec(inv.id);
+      if(m) max = Math.max(max, parseInt(m[1],10));
+    });
+    return 'TT-2026-' + String(max+1).padStart(3,'0');
+  }
+  function simpleHash(str){
+    var h = 0;
+    for(var i=0;i<str.length;i++){ h = ((h<<5)-h) + str.charCodeAt(i); h |= 0; }
+    return Math.abs(h);
+  }
+  function hexHash(seedNum){
+    var s = (seedNum >>> 0).toString(16);
+    while(s.length < 16) s += simpleHash(s + s.length).toString(16).slice(0,4);
+    return s.slice(0,16);
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------------- Simulated analysis engine ---------------- */
+  var forgeryTypes = [
+    'None detected', 'Splicing (background region)', 'Face-swap, 1 face',
+    'Face-swap, 2+ faces', 'Copy-move duplication', 'Deepfake artifact (facial)'
+  ];
+  function runSimulatedAnalysis(file){
+    var seedNum = simpleHash(file.name + '_' + file.size);
+    var typeIdx = seedNum % forgeryTypes.length;
+    var forgeryType = forgeryTypes[typeIdx];
+    var confidence = 58 + (seedNum % 41); // 58–98
+    var verdict;
+    if(typeIdx === 0){ verdict = confidence >= 90 ? 'authentic' : (confidence >= 78 ? 'authentic' : 'review'); }
+    else { verdict = confidence >= 80 ? 'flagged' : 'review'; }
+
+    var breakdown = [
+      { key:'metadata', title:'Metadata Analysis', icon:'doc',
+        status: verdict === 'flagged' ? 'reviewed' : 'pass',
+        summary: verdict === 'flagged' ? 'Editing software signature found in metadata.' : 'No unusual metadata detected.',
+        detail: 'Checked EXIF fields (creation tool, timestamps, GPS) against expected camera/app patterns for this file type.' },
+      { key:'consistency', title:'Image Consistency', icon:'search',
+        status: verdict === 'authentic' ? 'pass' : 'flagged',
+        summary: verdict === 'authentic' ? 'No signs of splicing or manipulation.' : ('Localized inconsistency detected: ' + forgeryType.toLowerCase() + '.'),
+        detail: 'Compared noise patterns, lighting direction and edge continuity across image regions to flag boundaries that don\u2019t belong together.' },
+      { key:'compression', title:'Compression Analysis', icon:'hash',
+        status:'pass', summary:'Compression levels are consistent.',
+        detail: 'Quantization tables and block artifacts were consistent across the frame, suggesting a single encode pass.' },
+      { key:'ela', title:'Error Level Analysis', icon:'flag',
+        status: verdict === 'flagged' ? 'reviewed' : 'pass',
+        summary: verdict === 'flagged' ? 'Abnormal pixel variations found in affected region.' : 'No abnormal pixel variations found.',
+        detail: 'Re-compressed the image and diffed error levels; brighter regions can indicate a different compression history than the rest of the image.' },
+      { key:'reverse', title:'Reverse Image Search', icon:'globe',
+        status: verdict === 'authentic' ? 'pass' : 'reviewed',
+        summary: verdict === 'authentic' ? 'No exact matches found. Some visually similar images exist.' : 'Visually similar images found across multiple sources.',
+        detail: 'Matched perceptual hashes and embeddings against a reference set to trace prior appearances of this image or its regions.' }
+    ];
+
+    return {
+      forgeryType: forgeryType, verdict: verdict, confidence: confidence,
+      breakdown: breakdown, hash: hexHash(seedNum)
+    };
+  }
+
+  /* ---------------- Rendering: Dashboard ---------------- */
+  function computeStats(){
+    var total = investigations.length;
+    var flaggedCount = investigations.filter(function(i){ return i.verdict === 'flagged'; }).length;
+    var avgConf = total ? Math.round(investigations.reduce(function(a,i){ return a+i.confidence; },0)/total) : 0;
+    return { total:total, flaggedCount:flaggedCount, avgConf:avgConf };
+  }
+
+  function renderStats(){
+    var s = computeStats();
+    var el = document.getElementById('statsRow');
+    el.innerHTML =
+      '<div class="stat"><div class="stat-top"><div class="stat-icon blue">'+icons.doc+'</div><div class="stat-delta up">↑ live</div></div>'+
+      '<div class="stat-num">'+s.total+'</div><div class="stat-label">Active Investigations</div></div>'+
+
+      '<div class="stat"><div class="stat-top"><div class="stat-icon green">'+icons.check+'</div><div class="stat-delta up">↑ live</div></div>'+
+      '<div class="stat-num">'+s.total+'</div><div class="stat-label">Images Analyzed</div></div>'+
+
+      '<div class="stat"><div class="stat-top"><div class="stat-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg></div><div class="stat-delta up">avg</div></div>'+
+      '<div class="stat-num">'+s.avgConf+'%</div><div class="stat-label">Avg. Detection Confidence</div></div>'+
+
+      '<div class="stat"><div class="stat-top"><div class="stat-icon red">'+icons.flag+'</div><div class="stat-delta down">flagged</div></div>'+
+      '<div class="stat-num">'+s.flaggedCount+'</div><div class="stat-label">Forgeries Detected</div></div>';
+  }
+
+  function thumbHtml(inv){
+    if(inv.img) return '<img src="'+inv.img+'" alt="">';
+    return icons.doc;
+  }
+
+  function tableRowHtml(inv){
+    return '<tr class="clickable" data-id="'+inv.id+'">'+
+      '<td><div class="inv-name"><div class="thumb">'+thumbHtml(inv)+'</div><div><div class="t">'+escapeHtml(inv.name)+'</div><div class="s">'+escapeHtml(inv.filename)+'</div></div></div></td>'+
+      '<td>'+inv.id+'</td>'+
+      '<td class="row-ext">'+escapeHtml(inv.forgeryType)+'</td>'+
+      '<td><span class="pill '+verdictPillClass(inv.verdict)+'">'+verdictLabel(inv.verdict)+'</span></td>'+
+      '<td class="conf">'+inv.confidence+'%</td>'+
+      '<td>'+inv.updated+'</td>'+
+    '</tr>';
+  }
+
+  function filteredInvestigations(){
+    var q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+    if(!q) return investigations;
+    return investigations.filter(function(inv){
+      return inv.name.toLowerCase().indexOf(q) > -1 ||
+             inv.id.toLowerCase().indexOf(q) > -1 ||
+             inv.forgeryType.toLowerCase().indexOf(q) > -1 ||
+             inv.filename.toLowerCase().indexOf(q) > -1;
+    });
+  }
+
+  function renderTables(){
+    var list = filteredInvestigations();
+
+    var dashBody = document.getElementById('dashTableBody');
+    var dashList = list.slice(0,5);
+    dashBody.innerHTML = dashList.length ? dashList.map(tableRowHtml).join('') :
+      '<tr class="empty-row"><td colspan="6">No investigations match your search.</td></tr>';
+
+    var repBody = document.getElementById('reportsTableBody');
+    repBody.innerHTML = list.length ? list.map(tableRowHtml).join('') :
+      '<tr class="empty-row"><td colspan="6">No investigations match your search.</td></tr>';
+    document.getElementById('reportsCount').textContent = list.length + ' of ' + investigations.length + ' investigations';
+
+    Array.prototype.forEach.call(document.querySelectorAll('table.inv tr.clickable'), function(row){
+      row.addEventListener('click', function(){
+        var inv = investigations.find(function(i){ return i.id === row.getAttribute('data-id'); });
+        if(inv){ lastAnalyzed = inv; renderAnalysis(inv); showView('analysis'); }
+      });
+    });
+  }
+
+  function renderChart(){
+    var wrap = document.getElementById('chartWrap');
+    var base = [38,52,30,64,46,78,55,70];
+    var labels = ['Aug 12','Aug 16','Aug 20','Aug 24','Aug 28','Sep 01','Sep 05','Sep 09'];
+    var todayBoost = Math.min(30, investigations.length * 3);
+    var heights = base.slice();
+    heights[heights.length-1] = Math.min(100, heights[heights.length-1] + todayBoost);
+    var max = Math.max.apply(null, heights);
+    wrap.innerHTML = heights.map(function(h,i){
+      var pct = Math.round((h/max)*100);
+      var peak = i === heights.length-1 ? ' peak' : '';
+      return '<div class="bar-col"><div class="bar'+peak+'" style="height:'+pct+'%"></div><div class="bar-lbl">'+labels[i]+'</div></div>';
+    }).join('');
+  }
+
+  function renderAlerts(){
+    var el = document.getElementById('alertsList');
+    el.innerHTML = alerts.map(function(a){
+      return '<div class="alert-item"><div class="alert-icon">'+icons[a.icon]+'</div>'+
+        '<div class="alert-body"><div class="t">'+escapeHtml(a.title)+'</div><div class="s">'+escapeHtml(a.sub)+'</div></div></div>';
+    }).join('');
+  }
+
+  var bellDotVisible = true;
+  function renderBell(){
+    var el = document.getElementById('bellList');
+    el.innerHTML = alerts.map(function(a){
+      return '<div class="dd-item"><div class="dd-icon">'+icons[a.icon]+'</div><div><div class="t">'+escapeHtml(a.title)+'</div><div class="s">'+escapeHtml(a.sub)+'</div></div></div>';
+    }).join('');
+  }
+
+  /* ---------------- Rendering: Analysis view ---------------- */
+  function renderAnalysis(inv){
+    document.getElementById('analysisEmpty').style.display = 'none';
+    document.getElementById('analysisContent').style.display = 'block';
+
+    document.getElementById('anCaseId').textContent = inv.id;
+    document.getElementById('anImg').src = inv.img || ('data:image/svg+xml;utf8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340"><rect width="600" height="340" fill="#DCE6FD"/><text x="300" y="175" font-family="Inter" font-size="18" fill="#2E56E8" text-anchor="middle">'+escapeHtml(inv.filename)+'</text></svg>'
+    ));
+    document.getElementById('anFname').textContent = inv.filename;
+    document.getElementById('anFtype').textContent = (inv.filename.split('.').pop()||'').toUpperCase() || '—';
+    document.getElementById('anFsize').textContent = inv.sizeLabel || '—';
+    document.getElementById('anFdate').textContent = inv.updated;
+
+    var badge = document.getElementById('anVerdictBadge');
+    badge.className = 'verdict-badge ' + verdictPillClass(inv.verdict);
+    badge.textContent = verdictLabel(inv.verdict);
+
+    var titleEl = document.getElementById('anAssessTitle');
+    var descEl = document.getElementById('anAssessDesc');
+    if(inv.verdict === 'authentic'){
+      titleEl.textContent = 'No strong signs of manipulation detected.';
+      descEl.textContent = 'Our analysis found no significant evidence of tampering. Minor inconsistencies may still exist — review the breakdown below.';
+    } else if(inv.verdict === 'review'){
+      titleEl.textContent = 'Some indicators need human review.';
+      descEl.textContent = 'One or more checks came back inconclusive. Treat this image as unverified until reviewed by an investigator.';
+    } else {
+      titleEl.textContent = 'Strong evidence of manipulation.';
+      descEl.textContent = 'Multiple checks flagged inconsistencies consistent with ' + inv.forgeryType.toLowerCase() + '. Evidence hash has been generated for chain of custody.';
+    }
+
+    var fill = document.getElementById('anConfFill');
+    fill.className = 'conf-fill ' + verdictPillClass(inv.verdict);
+    fill.style.width = inv.confidence + '%';
+    document.getElementById('anConfNum').textContent = inv.confidence + '%';
+
+    document.getElementById('anHash').textContent = inv.hash;
+    document.getElementById('anForgeryType').textContent = inv.forgeryType;
+
+    var bdList = document.getElementById('breakdownList');
+    var breakdown = inv.breakdown || [];
+    bdList.innerHTML = breakdown.map(function(b,idx){
+      var pillClass = b.status === 'pass' ? 'pass' : (b.status === 'reviewed' ? 'reviewed' : 'flagged');
+      var pillLabel = b.status === 'pass' ? 'Pass' : (b.status === 'reviewed' ? 'Reviewed' : 'Flagged');
+      return '<div class="breakdown-item" data-idx="'+idx+'">'+
+        '<div class="bd-head"><div class="bd-icon">'+icons[b.icon]+'</div>'+
+        '<div class="bd-title"><div class="t">'+escapeHtml(b.title)+'</div><div class="s">'+escapeHtml(b.summary)+'</div></div>'+
+        '<span class="pill '+pillClass+'">'+pillLabel+'</span>'+
+        '<svg class="bd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>'+
+        '<div class="bd-detail">'+escapeHtml(b.detail)+'</div></div>';
+    }).join('');
+
+    Array.prototype.forEach.call(bdList.querySelectorAll('.bd-head'), function(head){
+      head.addEventListener('click', function(){
+        head.parentElement.classList.toggle('open');
+      });
+    });
+  }
+
+  /* ---------------- View switching ---------------- */
+  function showView(name){
+    currentView = name;
+    Array.prototype.forEach.call(document.querySelectorAll('.view'), function(v){
+      v.classList.toggle('active', v.getAttribute('data-view-section') === name);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.nav-item[data-view]'), function(n){
+      n.classList.toggle('active', n.getAttribute('data-view') === name);
+    });
+    if(name === 'analysis'){
+      if(lastAnalyzed){
+        document.getElementById('analysisEmpty').style.display = 'none';
+        document.getElementById('analysisContent').style.display = 'block';
+      } else {
+        document.getElementById('analysisEmpty').style.display = 'block';
+        document.getElementById('analysisContent').style.display = 'none';
+      }
+    }
+    window.scrollTo(0,0);
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function(el){
+    el.addEventListener('click', function(){ showView(el.getAttribute('data-view')); });
+  });
+
+  /* ---------------- Upload + New Investigation flow ---------------- */
+  var fileInput = document.getElementById('fileInput');
+  var dropzone = document.getElementById('dropzone');
+  var chooseFileBtn = document.getElementById('chooseFileBtn');
+  var dzEmpty = document.getElementById('dzEmpty');
+  var dzPreview = document.getElementById('dzPreview');
+  var dzPreviewImg = document.getElementById('dzPreviewImg');
+  var dzFname = document.getElementById('dzFname');
+  var dzFmeta = document.getElementById('dzFmeta');
+  var dzClearBtn = document.getElementById('dzClearBtn');
+  var startBtn = document.getElementById('startBtn');
+  var invNameInput = document.getElementById('invName');
+
+  chooseFileBtn.addEventListener('click', function(e){ e.stopPropagation(); fileInput.click(); });
+  dropzone.addEventListener('click', function(){ if(!pendingFile) fileInput.click(); });
+  fileInput.addEventListener('change', function(){
+    if(fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+  ['dragenter','dragover'].forEach(function(evt){
+    dropzone.addEventListener(evt, function(e){ e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); });
+  });
+  ['dragleave','drop'].forEach(function(evt){
+    dropzone.addEventListener(evt, function(e){ e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); });
+  });
+  dropzone.addEventListener('drop', function(e){
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) handleFile(f);
+  });
+  dzClearBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    pendingFile = null;
+    fileInput.value = '';
+    dzEmpty.style.display = 'block';
+    dzPreview.classList.remove('show');
+    updateStartBtn();
+  });
+
+  function handleFile(file){
+    if(!file.type || file.type.indexOf('image/') !== 0){
+      alert('Please choose an image file (JPG, PNG or WEBP).');
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(e){
+      pendingFile = { file:file, dataUrl:e.target.result };
+      dzPreviewImg.src = e.target.result;
+      dzFname.textContent = file.name;
+      dzFmeta.textContent = fmtBytes(file.size) + ' · ' + (file.type || 'image');
+      dzEmpty.style.display = 'none';
+      dzPreview.classList.add('show');
+      if(!invNameInput.value){
+        invNameInput.value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g,' ');
+      }
+      updateStartBtn();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function updateStartBtn(){
+    startBtn.disabled = !pendingFile;
+  }
+
+  var progressWrap = document.getElementById('progressWrap');
+  var progressFill = document.getElementById('progressFill');
+  var progressLabel = document.getElementById('progressLabel');
+  var progressSteps = [
+    [15,'Reading pixel data…'],
+    [35,'Checking metadata & EXIF…'],
+    [58,'Scanning for splicing artifacts…'],
+    [78,'Running error-level analysis…'],
+    [92,'Matching against reference set…'],
+    [100,'Finalizing verdict…']
+  ];
+
+  startBtn.addEventListener('click', function(){
+    if(!pendingFile) return;
+    startBtn.disabled = true;
+    progressWrap.classList.add('show');
+    var i = 0;
+    progressFill.style.width = '0%';
+    var timer = setInterval(function(){
+      if(i >= progressSteps.length){
+        clearInterval(timer);
+        finishAnalysis();
+        return;
+      }
+      progressFill.style.width = progressSteps[i][0] + '%';
+      progressLabel.textContent = progressSteps[i][1];
+      i++;
+    }, 260);
+  });
+
+  function finishAnalysis(){
+    var result = runSimulatedAnalysis(pendingFile.file);
+    var now = new Date();
+    var inv = {
+      id: nextCaseId(),
+      name: invNameInput.value.trim() || pendingFile.file.name,
+      filename: pendingFile.file.name,
+      forgeryType: result.forgeryType,
+      verdict: result.verdict,
+      confidence: result.confidence,
+      updated: fmtDate(now),
+      img: pendingFile.dataUrl,
+      sizeLabel: fmtBytes(pendingFile.file.size),
+      hash: result.hash,
+      breakdown: result.breakdown
+    };
+    investigations.unshift(inv);
+    saveState();
+    lastAnalyzed = inv;
+
+    alerts.unshift({
+      icon: inv.verdict === 'flagged' ? 'flag' : 'check',
+      title: (inv.verdict === 'flagged' ? 'Manipulation flagged — ' : 'Analysis complete — ') + inv.name,
+      sub: inv.confidence + '% confidence · ' + inv.forgeryType + ' · just now'
+    });
+    alerts = alerts.slice(0,6);
+    bellDotVisible = true;
+    document.getElementById('bellDot').classList.remove('hide');
+
+    renderAll();
+    renderAnalysis(inv);
+
+    // reset the New Investigation form for next time
+    setTimeout(function(){
+      progressWrap.classList.remove('show');
+      progressFill.style.width = '0%';
+      pendingFile = null;
+      fileInput.value = '';
+      dzEmpty.style.display = 'block';
+      dzPreview.classList.remove('show');
+      invNameInput.value = '';
+      document.getElementById('invNotes').value = '';
+      updateStartBtn();
+      showView('analysis');
+    }, 350);
+  }
+
+  /* ---------------- Quick actions ---------------- */
+  document.getElementById('graphBtn').addEventListener('click', function(){
+    alert('Investigation Graph is a prototype feature — in the full build this opens a node graph linking matched accounts and propagation paths.');
+  });
+  document.getElementById('exportBtn').addEventListener('click', function(){
+    if(!investigations.length){ alert('No investigations to export yet.'); return; }
+    var latest = investigations[0];
+    alert('Evidence hash for ' + latest.id + ':\n\n' + latest.hash + '\n\nIn the full build this is written to an immutable ledger for chain-of-custody.');
+  });
+
+  /* ---------------- Search ---------------- */
+  document.getElementById('searchInput').addEventListener('input', function(){
+    renderTables();
+  });
+
+  /* ---------------- Bell + profile dropdowns ---------------- */
+  var bellBtn = document.getElementById('bellBtn');
+  var bellDropdown = document.getElementById('bellDropdown');
+  var profileBtn = document.getElementById('profileBtn');
+  var profileDropdown = document.getElementById('profileDropdown');
+
+  bellBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    profileDropdown.classList.remove('open');
+    bellDropdown.classList.toggle('open');
+    document.getElementById('bellDot').classList.add('hide');
+  });
+  profileBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    bellDropdown.classList.remove('open');
+    profileDropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', function(){
+    bellDropdown.classList.remove('open');
+    profileDropdown.classList.remove('open');
+  });
+
+  /* ---------------- Init ---------------- */
+  function renderAll(){
+    renderStats();
+    renderTables();
+    renderChart();
+    renderAlerts();
+    renderBell();
+  }
+  renderAll();
+  showView('dashboard');
+})();
+</script>
+</body>
+</html>
